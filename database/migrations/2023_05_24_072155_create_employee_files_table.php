@@ -15,7 +15,7 @@ return new class extends Migration
             $table->id();
             $table->string('emp_code');
             $table->string('emp_full_name');
-            $table->boolean('photo_uploaded');
+            $table->boolean('photo_uploaded')->default(false);
             $table->timestamps();
         });
     }

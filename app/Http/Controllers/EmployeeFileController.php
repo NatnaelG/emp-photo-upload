@@ -15,6 +15,11 @@ class EmployeeFileController extends Controller
      */
     public function index()
     {
+        $emp_code = EmployeeFile::find(1);
+        $photo = Storage::disk('local')->get('photos/1234.png');
+        
+        // return mime_content_type($photo);
+        // return response(Storage::disk('local')->get('photos/1234.png'), 200)->header('Content-Type', 'image/png');
         return EmployeeFile::all();
     }
 
@@ -38,7 +43,11 @@ class EmployeeFileController extends Controller
             return "Already uploaded";
         }
 
-        $filePath = Storage::disk('public')->put('photos', $form['photo']);
+        $filePath = Storage::disk('public')->putFileAs('photos', $form['photo'], $form['emp_code'].'.'.$form['photo']->getClientOriginalExtension());
+
+        // $filePath = Storage::putFileAs(
+        //     'photos', $form['photo'], $form['emp_code'].'.'.$form['photo']->getClientOriginalExtension()
+        // );
 
         if ($filePath) {
             
@@ -50,6 +59,24 @@ class EmployeeFileController extends Controller
 
         return 'Something went wrong';
         
+    }
+
+
+    public function bulkStore(Request $request)
+    {
+        // return $request->employees;
+     
+        foreach ($request->employees as $employee) {
+            
+            $newEmployee = new EmployeeFile();
+            $newEmployee->emp_code = $employee['em_code'];
+            $newEmployee->emp_full_name = $employee['first_name'] . " " . $employee['middle_name'] . " " . $employee['last_name'];
+            $newEmployee->photo_uploaded = false;
+
+            $newEmployee->save();
+        }
+        return $newEmployee;
+
     }
 
     /**
