@@ -13,13 +13,11 @@ class EmployeeFileController extends Controller
      *
      * @return \Illuminate\Http\Response
      */
-    public function index()
+    public function index(Request $request)
     {
-        $emp_code = EmployeeFile::find(1);
-        $photo = Storage::disk('local')->get('photos/1234.png');
-        
-        // return mime_content_type($photo);
-        // return response(Storage::disk('local')->get('photos/1234.png'), 200)->header('Content-Type', 'image/png');
+        if ($request->filter) {
+            return EmployeeFile::where('photo_uploaded', false)->get();
+        }
         return EmployeeFile::all();
     }
 
@@ -31,51 +29,73 @@ class EmployeeFileController extends Controller
      */
     public function store(Request $request)
     {
-        // return $request->emp_code;
         $form = $request->validate([
             'emp_code' => 'required',
-            'photo' => 'required'
+            'photo' => 'required|file'
         ]);
 
         $employee = EmployeeFile::where('emp_code', $form['emp_code'])->first();
-        // return $employee;
+
         if ($employee->photo_uploaded) {
-            return "Already uploaded";
+            return response()->json(
+                [
+                    'errors' => [
+                        'emp_code' => 'Already uploaded',
+                    ]
+                ],
+                400
+            );
         }
 
         $filePath = Storage::disk('public')->putFileAs('photos', $form['photo'], $form['emp_code'].'.'.$form['photo']->getClientOriginalExtension());
-
-        // $filePath = Storage::putFileAs(
-        //     'photos', $form['photo'], $form['emp_code'].'.'.$form['photo']->getClientOriginalExtension()
-        // );
 
         if ($filePath) {
             
             $employee->photo_uploaded = true;
             $employee->save();
 
-            return 'Successfully saved';
+            return response()->json(
+                [
+                    'data' => [
+                        'message' => 'Successfully saved',
+                    ]
+                ],
+                200
+            );
         }
 
-        return 'Something went wrong';
+        return response()->json(
+            [
+                'errors' => [
+                    'emp_code' => 'Something went wrong',
+                ]
+            ],
+            400
+        );
         
     }
 
 
     public function bulkStore(Request $request)
     {
-        // return $request->employees;
-     
         foreach ($request->employees as $employee) {
             
             $newEmployee = new EmployeeFile();
             $newEmployee->emp_code = $employee['em_code'];
             $newEmployee->emp_full_name = $employee['first_name'] . " " . $employee['middle_name'] . " " . $employee['last_name'];
-            $newEmployee->photo_uploaded = false;
 
             $newEmployee->save();
         }
-        return $newEmployee;
+
+        return response()->json(
+            [
+                'data' => [
+                    'last_employee' => $newEmployee,
+                    'message' => 'Successfully saved',
+                ]
+            ],
+            200
+        );
 
     }
 
