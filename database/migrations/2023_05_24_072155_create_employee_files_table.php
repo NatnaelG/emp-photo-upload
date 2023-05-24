@@ -14,7 +14,7 @@ return new class extends Migration
         Schema::create('employee_files', function (Blueprint $table) {
             $table->id();
             $table->string('emp_code');
-            $table->string('full_name');
+            $table->string('emp_full_name');
             $table->boolean('photo_uploaded');
             $table->timestamps();
         });
