@@ -36,18 +36,18 @@ class EmployeeFileController extends Controller
 
         $employee = EmployeeFile::where('emp_code', $form['emp_code'])->first();
 
-        if ($employee->photo_uploaded) {
+        if (!$employee) {
             return response()->json(
                 [
                     'errors' => [
-                        'emp_code' => 'Already uploaded',
+                        'emp_code' => 'Employee not found',
                     ]
                 ],
                 400
             );
         }
 
-        $filePath = Storage::disk('public')->putFileAs('photos', $form['photo'], $form['emp_code'].'.'.$form['photo']->getClientOriginalExtension());
+        $filePath = Storage::disk('public')->putFileAs('photos', $form['photo'], $form['emp_code'].'.jpg');
 
         if ($filePath) {
             
