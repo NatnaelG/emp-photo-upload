@@ -79,18 +79,17 @@ class EmployeeFileController extends Controller
     public function bulkStore(Request $request)
     {
         foreach ($request->employees as $employee) {
-            
-            $newEmployee = new EmployeeFile();
-            $newEmployee->emp_code = $employee['em_code'];
-            $newEmployee->emp_full_name = $employee['first_name'] . " " . $employee['middle_name'] . " " . $employee['last_name'];
 
-            $newEmployee->save();
+            $employeeFile = EmployeeFile::firstOrCreate(
+                ['emp_code' => $employee['em_code']],
+                ['emp_full_name' => $employee['first_name'] . " " . $employee['middle_name'] . " " . $employee['last_name']]
+            );
         }
 
         return response()->json(
             [
                 'data' => [
-                    'last_employee' => $newEmployee,
+                    'last_employee' => $employeeFile,
                     'message' => 'Successfully saved',
                 ]
             ],
